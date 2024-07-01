@@ -12,10 +12,12 @@ public class TaskProgress {
 
     private double totalContract;
     private double finishContractPercentage;
+
+    private double contractProcessVelocityPerSecond;
     private double estimatedRemainingTime;
 
     private double finishShardPercentage;
-    private double contractProcessVelocityPerSecond;
+
     private double hdssApiQpsPerNode;
 
     // Getters and Setters
