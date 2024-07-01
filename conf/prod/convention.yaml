@@ -1,0 +1,14 @@
+containerProbes:
+  livenessProbe:
+    httpGet:
+      path: "/actuator/health"
+  readinessProbe:
+    httpGet:
+      path: "/actuator/health"
+
+
+#NFS配置，没有可以不配
+nfsMappings:
+  - server: 10.26.215.182
+    path: /FPG2/miniplum/miniplum/prod
+    mountPath: /nfs/miniplum/prod

@@ -42,7 +42,6 @@ public class HDSSApiService {
 PROD
     private static final String BASE_URL = "https://homegw.homecreditcfc.cn/hdss/v1/documents";
 
-    private static final String AUTH_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IjIxIn0.eyJhdWQiOiJIRFNTIiwic3ViIjoiMjQiLCJpYXQiOjE1ODU2OTIxMTksIm5iZiI6MTU4NTY5MjExOSwiZXhwIjoxOTAxMjI0OTE5LCJoZHNzX3YxIjp7ImciOlt7ImR0IjpbIioiXSwiYWMiOlsiKiJdLCJwYyI6WyIqIl19XX19.LmQbb59iCn-CLh1uZiSbrx-wgf_yT2Q0LSU0gIoTN3RbTPb29rMHPoQBwP8EkInbjr1VaF4dmMhL1adl0JeUAw";
     //10.26.215.182:/FPG2/miniplum/miniplum/
     private static final String NAS_PATH = "/FPG2/miniplum/miniplum/";
 */
