@@ -10,11 +10,13 @@ import java.util.List;
 @AllArgsConstructor
 public class TaskProgress {
 
-    private double totalSize;
-    private double totalPercentage;
-    private double shardPercentage;
-    private double totalVelocity;
-    private double ratePerNode;
+    private double totalContract;
+    private double finishContractPercentage;
+    private double estimatedRemainingTime;
+
+    private double finishShardPercentage;
+    private double contractProcessVelocityPerSecond;
+    private double hdssApiQpsPerNode;
 
     // Getters and Setters
 }

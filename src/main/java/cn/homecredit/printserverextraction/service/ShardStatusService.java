@@ -88,10 +88,11 @@ public class ShardStatusService {
         double shardPercentage = shardProcessedSize==null?0:(double) shardProcessedSize / totalSize * 100;
         long minutes=getSecondsSinceEarliestProcessedEdate();
         double totalVelocity = totalprocessedSize==null?0:(double)totalprocessedSize / minutes;
+        double restTime= (totalprocessedSize==null?totalSize: (totalSize-totalprocessedSize))/totalVelocity;
 
         double ratePerNode=getActualRequestRate();
 
-        return  new TaskProgress(totalSize,totalPercentage, shardPercentage,totalVelocity,ratePerNode);
+        return  new TaskProgress(totalSize,totalPercentage,restTime, shardPercentage,totalVelocity,ratePerNode);
     }
     private long getSecondsSinceEarliestProcessedEdate() {
         Date earliestEdate = contractRepository.findEarliestProcessedEdate();

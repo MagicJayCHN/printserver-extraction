@@ -87,7 +87,7 @@ public class TaskSchedulerController {
         String requestUrl = getFullRequestUrl(httpRequest);
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
 
-        if (scheduledFuture != null) {
+        if (scheduledFuture != null&&!scheduledFuture.isCancelled()) {
 
             request.setCurrentPod(request.getCurrentPod() + 1);
             //已经开始的任务（执行过程中判断iscancel()可以自行中断），应该开始但没开始的任务（等待的任务，没分配到线程，则直接不开始了），还没开始的任务（直接就不开始了）
