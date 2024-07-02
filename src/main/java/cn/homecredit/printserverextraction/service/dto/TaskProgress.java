@@ -14,7 +14,8 @@ public class TaskProgress {
     private double finishContractPercentage;
 
     private double contractProcessVelocityPerSecond;
-    private double estimatedRemainingTime;
+    private double estimatedRemainingSeconcd;
+    private double estimatedRemainingHour;
 
     private double finishShardPercentage;
 

@@ -75,9 +75,15 @@ public class ContractProcessingService {
     public void processShard(Boolean reprocess) {
         long threadId = Thread.currentThread().getId();
         String editor= pid+":"+threadId;
+
+
         ShardStatus shard = shardStatusService.getSuspendOrPendingShardAndUpdateProcessing(editor);
         if (shard == null) {
             log.info("No shard need to process");
+            if (scheduledFuture.isCancelled()) {
+                log.warn("Task be canceled: " + ",editor: " + editor);
+                return;
+            }
             return;
         }
 

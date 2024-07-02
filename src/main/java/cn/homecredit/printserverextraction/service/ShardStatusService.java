@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
@@ -77,26 +79,32 @@ public class ShardStatusService {
         shardStatusRepository.resetShardStatus();
     }
 
+
     public TaskProgress getTaskProgress() {
 
         Long totalSize = shardStatusRepository.getTotalSize();
         Long totalprocessedSize = shardStatusRepository.getTotalprocessedSize();
         Long shardProcessedSize = shardStatusRepository.getShardProcessedSize();
 
+        double totalPercentage = totalprocessedSize == null ? 0 : (double) totalprocessedSize / totalSize * 100;
+        double roundedTotalPercentage = new BigDecimal(totalPercentage).setScale(3, RoundingMode.HALF_UP).doubleValue();
 
-        double totalPercentage = totalprocessedSize==null?0:(double) totalprocessedSize / totalSize * 100;
+        long seconds = getSecondsSinceEarliestProcessedEdate();
+        double totalVelocity = totalprocessedSize == null ? 0 : (double) totalprocessedSize / seconds;
+        double roundedTotalVelocity = new BigDecimal(totalVelocity).setScale(3, RoundingMode.HALF_UP).doubleValue();
 
-        long seconds=getSecondsSinceEarliestProcessedEdate();
-        double totalVelocity = totalprocessedSize==null?0:(double)totalprocessedSize / seconds;
-        double restTime=0;
-        if (totalVelocity!=0) {
+        double restTime = 0;
+        if (totalVelocity != 0) {
             restTime = (totalprocessedSize == null ? totalSize : (totalSize - totalprocessedSize)) / totalVelocity;
         }
+        double roundedRestTime = new BigDecimal(restTime).setScale(3, RoundingMode.HALF_UP).doubleValue();
 
-        double shardPercentage = shardProcessedSize==null?0:(double) shardProcessedSize / totalSize * 100;
-        double ratePerNode=getActualRequestRate();
+        double shardPercentage = shardProcessedSize == null ? 0 : (double) shardProcessedSize / totalSize * 100;
+        double roundedShardPercentage = new BigDecimal(shardPercentage).setScale(3, RoundingMode.HALF_UP).doubleValue();
 
-        return  new TaskProgress(totalSize,totalPercentage,totalVelocity,restTime, shardPercentage,ratePerNode);
+        double ratePerNode = getActualRequestRate();
+
+        return new TaskProgress(totalSize, roundedTotalPercentage, roundedTotalVelocity, roundedRestTime, roundedRestTime / 3600, roundedShardPercentage, ratePerNode);
     }
     private long getSecondsSinceEarliestProcessedEdate() {
         Date earliestEdate = contractRepository.findEarliestProcessedEdate();
