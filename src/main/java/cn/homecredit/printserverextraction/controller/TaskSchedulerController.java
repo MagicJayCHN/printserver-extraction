@@ -47,12 +47,12 @@ public class TaskSchedulerController {
         return "Shards initialized";
     }
 
-
+    String template1="All {} pod stop,extra route {} times";
     @PostMapping("/start")
     public String startTask(@RequestBody SchedulerStartRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
-        log.info("Pod be invoked start, all pods:{},current pods:{} " , request.getAllPods() , request.getCurrentPod() );
+        log.info(template1 , request.getAllPods() , request.getCurrentPod() );
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
             if (request.getCurrentPod() < request.getAllPods()) {
                 // 已经启动过，并且发送次数(启动节点个数)不满足，则重新发起 HTTP 请求给别的节点
@@ -74,7 +74,7 @@ public class TaskSchedulerController {
 
                 restTemplate.postForObject(requestUrl, request, String.class);
             } else if (request.getCurrentPod() >= request.getAllPods()) {
-                log.info("All " + request.getAllPods() + " pod start" + ",extra route " + request.getTotalTimes() + " times");
+                log.info(template1,request.getAllPods() ,request.getTotalTimes());
             }
 
             return "Start task begin";
@@ -99,7 +99,7 @@ public class TaskSchedulerController {
 
                 restTemplate.postForObject(requestUrl, request, String.class);
             } else if (request.getCurrentPod() >= request.getAllPods()) {
-                log.info("All " + request.getAllPods() + " pod stop" + ",extra route " + request.getTotalTimes() + " times");
+                log.info(template1,request.getAllPods() ,request.getTotalTimes());
             }
 
             return "Stop task begin";
@@ -151,7 +151,7 @@ public class TaskSchedulerController {
 
                 restTemplate.postForObject(requestUrl, request, String.class);
             } else if (request.getCurrentPod() >= request.getAllPods()) {
-                log.info("All " + request.getAllPods() + " pod reprocess" + ",extra route " + request.getTotalTimes() + " times");
+                log.info(template1,request.getAllPods() ,request.getTotalTimes());
             }
 
 
