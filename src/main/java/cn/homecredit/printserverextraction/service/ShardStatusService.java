@@ -98,13 +98,13 @@ public class ShardStatusService {
             restTime = (totalprocessedSize == null ? totalSize : (totalSize - totalprocessedSize)) / totalVelocity;
         }
         double roundedRestTime = new BigDecimal(restTime).setScale(3, RoundingMode.HALF_UP).doubleValue();
-
+        double estimatedRemainingHour = new BigDecimal(restTime/3600).setScale(3, RoundingMode.HALF_UP).doubleValue();
         double shardPercentage = shardProcessedSize == null ? 0 : (double) shardProcessedSize / totalSize * 100;
         double roundedShardPercentage = new BigDecimal(shardPercentage).setScale(3, RoundingMode.HALF_UP).doubleValue();
 
-        double ratePerNode = getActualRequestRate();
+        double ratePerNode =new BigDecimal(getActualRequestRate()).setScale(3, RoundingMode.HALF_UP).doubleValue(); ;
 
-        return new TaskProgress(totalSize, roundedTotalPercentage, roundedTotalVelocity, roundedRestTime, roundedRestTime / 3600, roundedShardPercentage, ratePerNode);
+        return new TaskProgress(totalSize, roundedTotalPercentage, roundedTotalVelocity, roundedRestTime, estimatedRemainingHour, roundedShardPercentage, ratePerNode);
     }
     private long getSecondsSinceEarliestProcessedEdate() {
         Date earliestEdate = contractRepository.findEarliestProcessedEdate();
