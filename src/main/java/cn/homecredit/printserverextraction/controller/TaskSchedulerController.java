@@ -118,7 +118,7 @@ public class TaskSchedulerController {
     }
 
 
-    @PostMapping("/reprocess")
+    @PostMapping("/reprocess")//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
     public String reprocessTask(@RequestBody SchedulerStartRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
 
