@@ -52,8 +52,7 @@ public class TaskSchedulerController {
     public String startTask(@RequestBody SchedulerStartRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
-        log.info("Pod be invoked reprocess, all pods " + request.getAllPods() +  ",current pods " + request.getCurrentPod() );
-
+        log.info("Pod be invoked start, all pods:{},current pods:{} " , request.getAllPods() , request.getCurrentPod() );
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
             if (request.getCurrentPod() < request.getAllPods()) {
                 // 已经启动过，并且发送次数(启动节点个数)不满足，则重新发起 HTTP 请求给别的节点
@@ -87,7 +86,7 @@ public class TaskSchedulerController {
     public String stopTask(@RequestBody SchedulerStopRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
-        log.info("Pod be invoked stop, all pods " + request.getAllPods() +  ",current pods " + request.getCurrentPod() );
+        log.info("Pod be invoked stop, all pods:{},current pods:{} " , request.getAllPods() , request.getCurrentPod() );
         if (scheduledFuture != null&&!scheduledFuture.isCancelled()) {
 
             request.setCurrentPod(request.getCurrentPod() + 1);
@@ -122,7 +121,7 @@ public class TaskSchedulerController {
     @PostMapping("/reprocess")//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
     public String reprocessTask(@RequestBody SchedulerStartRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
-        log.info("Pod be invoked reprocess, all pods " + request.getAllPods() +  ",current pods " + request.getCurrentPod() );
+        log.info("Pod be invoked reprocess, all pods:{},current pods:{} " , request.getAllPods() , request.getCurrentPod() );
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
 
