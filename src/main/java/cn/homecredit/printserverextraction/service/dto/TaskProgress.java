@@ -19,7 +19,7 @@ public class TaskProgress {
 
     private double finishShardPercentage;
 
-    private double hdssApiQpsPerNode;
+    private double hdssApiQpsPerPod;
 
     // Getters and Setters
 }

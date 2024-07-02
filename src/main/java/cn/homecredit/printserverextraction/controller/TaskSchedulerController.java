@@ -52,6 +52,7 @@ public class TaskSchedulerController {
     public String startTask(@RequestBody SchedulerStartRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
+        log.info("Pod be invoked reprocess, all pods " + request.getAllPods() +  ",current pods " + request.getCurrentPod() );
 
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
             if (request.getCurrentPod() < request.getAllPods()) {
@@ -74,7 +75,7 @@ public class TaskSchedulerController {
 
                 restTemplate.postForObject(requestUrl, request, String.class);
             } else if (request.getCurrentPod() >= request.getAllPods()) {
-                log.info("All " + request.getAllPods() + " node start" + ",extra route " + request.getTotalTimes() + " times");
+                log.info("All " + request.getAllPods() + " pod start" + ",extra route " + request.getTotalTimes() + " times");
             }
 
             return "Start task begin";
@@ -86,7 +87,7 @@ public class TaskSchedulerController {
     public String stopTask(@RequestBody SchedulerStopRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
-
+        log.info("Pod be invoked stop, all pods " + request.getAllPods() +  ",current pods " + request.getCurrentPod() );
         if (scheduledFuture != null&&!scheduledFuture.isCancelled()) {
 
             request.setCurrentPod(request.getCurrentPod() + 1);
@@ -99,7 +100,7 @@ public class TaskSchedulerController {
 
                 restTemplate.postForObject(requestUrl, request, String.class);
             } else if (request.getCurrentPod() >= request.getAllPods()) {
-                log.info("All " + request.getAllPods() + " node stop" + ",extra route " + request.getTotalTimes() + " times");
+                log.info("All " + request.getAllPods() + " pod stop" + ",extra route " + request.getTotalTimes() + " times");
             }
 
             return "Stop task begin";
@@ -121,7 +122,7 @@ public class TaskSchedulerController {
     @PostMapping("/reprocess")//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
     public String reprocessTask(@RequestBody SchedulerStartRequest request, HttpServletRequest httpRequest) {
         String requestUrl = getFullRequestUrl(httpRequest);
-
+        log.info("Pod be invoked reprocess, all pods " + request.getAllPods() +  ",current pods " + request.getCurrentPod() );
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
 
@@ -151,7 +152,7 @@ public class TaskSchedulerController {
 
                 restTemplate.postForObject(requestUrl, request, String.class);
             } else if (request.getCurrentPod() >= request.getAllPods()) {
-                log.info("All " + request.getAllPods() + " node reprocess" + ",extra route " + request.getTotalTimes() + " times");
+                log.info("All " + request.getAllPods() + " pod reprocess" + ",extra route " + request.getTotalTimes() + " times");
             }
 
 
