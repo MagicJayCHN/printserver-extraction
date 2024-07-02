@@ -55,7 +55,7 @@ public class ShardStatusService {
         long minId = contractRepository.findMinId();
         long maxId = contractRepository.findMaxId();
         long totalDataSize = contractRepository.count();
-        long shardCount = (totalDataSize + shardSize - 1) / shardSize;
+        long shardCount = (totalDataSize  / (shardSize+1))+1;
 
         shardStatusRepository.deleteAll();
 
