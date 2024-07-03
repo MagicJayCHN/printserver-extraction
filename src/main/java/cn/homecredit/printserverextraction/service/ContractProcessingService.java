@@ -72,7 +72,7 @@ public class ContractProcessingService {
     }
 
     @Async
-    public void processShard(Boolean reprocess) {
+    public void processShard(Boolean isRepair) {
         long threadId = Thread.currentThread().getId();
         String editor= pid+":"+threadId;
 
@@ -92,7 +92,7 @@ public class ContractProcessingService {
             Long endId = shard.getEndId();
 
             List<Contract> dataList;
-            if (reprocess) {
+            if (isRepair) {
                 dataList = contractRepository.findFAILEDDataInShard(startId, endId);
             }else {
                 dataList = contractRepository.findPendingDataInShard(startId, endId,contractStatusList);

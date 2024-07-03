@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class SchedulerStartRequest {
-    private Boolean reprocess=false;
+    private Boolean isRepair=false;
     // Getters and Setters
 }
 

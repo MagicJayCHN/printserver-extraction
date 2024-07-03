@@ -90,7 +90,7 @@ public class TaskSchedulerController {
 
         } else {
 
-            scheduledFuture = taskScheduler.scheduleAtFixedRate(() -> contractProcessingService.processShard(request.getReprocess()), interval);
+            scheduledFuture = taskScheduler.scheduleAtFixedRate(() -> contractProcessingService.processShard(request.getIsRepair()), interval);
             contractProcessingService.setScheduledFuture(scheduledFuture);
             log.info("task begin to start");
 
@@ -119,15 +119,15 @@ public class TaskSchedulerController {
     }
 
 
-    @PostMapping("/reprocess")//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
-    public String reprocessTask() {
+    @PostMapping("/repair")
+    public String repairTask() {
 
         Map<String, List<Pod>> podsGroupByStatus = getPodsGroupByStatus();
         List<Pod> runningTaskPods=podsGroupByStatus.get("running");
         int runningTasks=runningTaskPods==null?0:runningTaskPods.size();
         List<Pod> stoppedTaskPods=podsGroupByStatus.get("stopped");
 
-        if(runningTasks>0){
+        if(runningTasks>0){//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
             return "existing running task:{"+runningTasks+"},please finish all running task and begin to reprocess";
         }
 
@@ -137,7 +137,7 @@ public class TaskSchedulerController {
 
             String url = String.format("http://%s:8080/api/task/start", pod.getStatus().getPodIP());
             SchedulerStartRequest request=new SchedulerStartRequest();
-            request.setReprocess(true);
+            request.setIsRepair(true);
             restTemplate.postForObject(url, request, String.class);
         }
         log.info("task begin to reprocess");
