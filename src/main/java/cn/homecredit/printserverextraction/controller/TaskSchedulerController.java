@@ -43,8 +43,8 @@ public class TaskSchedulerController {
 
     private KubernetesClient kubernetesClient = new DefaultKubernetesClient();
 
-    String stopped = "stopped";
-    String running = "running";
+    private final String STOPPED = "stopped";
+    private final String RUNNING = "running";
 
 
     @Autowired
@@ -73,9 +73,9 @@ public class TaskSchedulerController {
     public String getTaskStatus() {
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
         if (scheduledFuture == null || scheduledFuture.isCancelled()) {
-            return stopped;
+            return STOPPED;
         } else {//即scheduledFuture != null && !scheduledFuture.isCancelled()
-            return running;
+            return RUNNING;
         }
 
     }
@@ -96,7 +96,7 @@ public class TaskSchedulerController {
             log.info("task begin to start");
 
         }
-        return running;
+        return RUNNING;
     }
 
 
@@ -115,7 +115,7 @@ public class TaskSchedulerController {
             log.info("task is already stopped");
         }
 
-        return stopped;
+        return STOPPED;
 
     }
 
@@ -124,9 +124,9 @@ public class TaskSchedulerController {
     public String repairTask() {
 
         Map<String, List<Pod>> podsGroupByStatus = getPodsGroupByStatus();
-        List<Pod> runningTaskPods = podsGroupByStatus.get(running);
+        List<Pod> runningTaskPods = podsGroupByStatus.get(RUNNING);
         int runningTasks = runningTaskPods == null ? 0 : runningTaskPods.size();
-        List<Pod> stoppedTaskPods = podsGroupByStatus.get(stopped);
+        List<Pod> stoppedTaskPods = podsGroupByStatus.get(STOPPED);
 
         if (runningTasks > 0) {//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
             return "existing running task:{" + runningTasks + "},please finish all running task and begin to reprocess";
@@ -149,9 +149,9 @@ public class TaskSchedulerController {
 
     private int adjustTask(int taskCount) {
         Map<String, List<Pod>> podsGroupByStatus = getPodsGroupByStatus();
-        List<Pod> runningTaskPods = podsGroupByStatus.get(running);
+        List<Pod> runningTaskPods = podsGroupByStatus.get(RUNNING);
         int runningTasks = runningTaskPods == null ? 0 : runningTaskPods.size();
-        List<Pod> stoppedTaskPods = podsGroupByStatus.get(stopped);
+        List<Pod> stoppedTaskPods = podsGroupByStatus.get(STOPPED);
         int stoppedTasks = stoppedTaskPods == null ? 0 : stoppedTaskPods.size();
 
         if (taskCount > runningTasks + stoppedTasks || taskCount < 0) {
