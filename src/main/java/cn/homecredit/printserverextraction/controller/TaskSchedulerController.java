@@ -183,6 +183,7 @@ public class TaskSchedulerController {
         Map<String, List<Pod>> statusMap = new HashMap<>();
 
         for (Pod pod : pods) {
+            log.info("retrieve the pod：{}",pod.getMetadata().getName());
             String podIp = pod.getStatus().getPodIP();
             String url = String.format("http://%s:8080/api/task/status", podIp);
 
