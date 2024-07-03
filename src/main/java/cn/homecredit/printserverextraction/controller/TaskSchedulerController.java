@@ -164,8 +164,8 @@ public class TaskSchedulerController {
                 for (int i = 0; i < taskCount - runningTasks; i++) {
                     String url = String.format("http://%s:8080/api/task/start", stoppedTaskPods.get(i % stoppedTasks).getStatus().getPodIP());
                     restTemplate.postForObject(url, null, String.class);
-                    log.info("existing running task:{},stopped task：{},so start task: {}", runningTasks, stoppedTasks, taskCount - runningTasks);
                 }
+                log.info("existing running task:{},stopped task：{},so start task: {}", runningTasks, stoppedTasks, taskCount - runningTasks);
             }
         } else if (taskCount < runningTasks) {
             // Stop some tasks
@@ -174,8 +174,8 @@ public class TaskSchedulerController {
                     String url = String.format("http://%s:8080/api/task/stop", runningTaskPods.get(i % runningTasks).getStatus().getPodIP());
                     SchedulerStartRequest request=new SchedulerStartRequest();
                     restTemplate.postForObject(url, request, String.class);
-                    log.info("existing running task:{},stopped task：{},so stop task: {}", runningTasks, stoppedTasks, runningTasks - taskCount);
                 }
+                log.info("existing running task:{},stopped task：{},so stop task: {}", runningTasks, stoppedTasks, runningTasks - taskCount);
             }
         }
 
