@@ -128,7 +128,7 @@ public class TaskSchedulerController {
         List<Pod> stoppedTaskPods=podsGroupByStatus.get("stopped");
 
         if(runningTasks>0){
-            return "existing running task,please finish all running task and begin to reprocess";
+            return "existing running task:{"+runningTasks+"},please finish all running task and begin to reprocess";
         }
 
         shardStatusService.resetShardStatus();
