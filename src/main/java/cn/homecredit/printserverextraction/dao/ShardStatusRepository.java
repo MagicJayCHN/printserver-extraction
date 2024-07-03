@@ -22,12 +22,13 @@ public interface ShardStatusRepository extends JpaRepository<ShardStatus, Intege
     @Query("SELECT SUM(s.endId+1 - s.startId) FROM ShardStatus s")
     Long getTotalSize();
 
+
     //总处理进度
     @Query("SELECT SUM(s.currentId - s.startId) FROM ShardStatus s WHERE s.currentId IS NOT NULL")
     Long getTotalprocessedSize();
 
     //分片处理进度
-    @Query("SELECT SUM(s.endId+1 - s.startId) FROM ShardStatus s WHERE s.status = 'PROCESSED'")
+    @Query("SELECT COUNT(s.shardId) FROM ShardStatus s WHERE s.status = 'PROCESSED'")
     Long getShardProcessedSize();
 
 

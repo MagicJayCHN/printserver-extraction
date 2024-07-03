@@ -24,7 +24,10 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -43,6 +46,12 @@ public class ContractProcessingService {
 
     @Autowired
     private HDSSApiService HdssApiService;
+
+    public Queue<Long> getRequestTimestamps() {
+        return requestTimestamps;
+    }
+
+    private final Queue<Long> requestTimestamps=  new ConcurrentLinkedQueue<>();;
 
     @Autowired
     private ShardStatusService shardStatusService;
@@ -69,6 +78,7 @@ public class ContractProcessingService {
     public void init() {
         // 将逗号分隔的字符串转换为列表
         this.contractStatusList = Arrays.asList(contractStatuses.split(","));
+
     }
 
     @Async
@@ -157,6 +167,11 @@ public class ContractProcessingService {
 
                 }
 
+                long currentTime1 = System.currentTimeMillis();
+                requestTimestamps.add(currentTime1);
+                while (!requestTimestamps.isEmpty() && currentTime1 - requestTimestamps.peek() > TimeUnit.MINUTES.toMillis(1)) {
+                    requestTimestamps.poll();
+                }
 
             }
 

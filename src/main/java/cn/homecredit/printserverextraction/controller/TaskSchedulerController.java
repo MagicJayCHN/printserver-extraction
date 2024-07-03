@@ -43,8 +43,8 @@ public class TaskSchedulerController {
 
     private KubernetesClient kubernetesClient = new DefaultKubernetesClient();
 
-    private final String STOPPED = "stopped";
-    private final String RUNNING = "running";
+    public static final String STOPPED = "stopped";
+    public static final String RUNNING = "running";
 
 
     @Autowired
@@ -182,7 +182,7 @@ public class TaskSchedulerController {
         return taskCount;
     }
 
-    private Map<String, List<Pod>> getPodsGroupByStatus() {
+    public Map<String, List<Pod>> getPodsGroupByStatus() {
         List<Pod> pods = kubernetesClient.pods().inNamespace("technical-tool").withLabel("artifactId", "printserver-extraction").list().getItems();
         Map<String, List<Pod>> statusMap = new HashMap<>();
 
