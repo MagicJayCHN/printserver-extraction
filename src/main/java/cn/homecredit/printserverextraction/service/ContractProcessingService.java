@@ -99,6 +99,9 @@ public class ContractProcessingService {
             }
 
             if (dataList.isEmpty()) {
+                log.info("No contract need to process");
+                shard.setStatus("PROCESSED");
+                shardStatusRepository.save(shard);
                 return;
             }
 
