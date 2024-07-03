@@ -41,8 +41,10 @@ public class TaskSchedulerController {
     @Value("${ps.immig.task.contractprocessing.interval}")
     private long interval;
 
-    private  KubernetesClient kubernetesClient=new DefaultKubernetesClient();
+    private KubernetesClient kubernetesClient = new DefaultKubernetesClient();
 
+    String stopped = "stopped";
+    String running = "running";
 
 
     @Autowired
@@ -56,12 +58,12 @@ public class TaskSchedulerController {
     }
 
 
-    @PostMapping("/task/adjust")
+    @PostMapping("/adjust")
     public String adjust(@RequestParam int taskCount) {
-        int t=adjustTask(taskCount);
-        if(t==-1){
+        int t = adjustTask(taskCount);
+        if (t == -1) {
             return "taskCount must be between 0 and podsNumber";
-        }else{
+        } else {
             return "adjust successfully";
         }
 
@@ -70,11 +72,10 @@ public class TaskSchedulerController {
     @GetMapping("/status")
     public String getTaskStatus() {
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
-          if (scheduledFuture == null || scheduledFuture.isCancelled()){
-              return "stopped";
-          }
-          else {//即scheduledFuture != null && !scheduledFuture.isCancelled()
-            return "running";
+        if (scheduledFuture == null || scheduledFuture.isCancelled()) {
+            return stopped;
+        } else {//即scheduledFuture != null && !scheduledFuture.isCancelled()
+            return running;
         }
 
     }
@@ -95,7 +96,7 @@ public class TaskSchedulerController {
             log.info("task begin to start");
 
         }
-        return "running";
+        return running;
     }
 
 
@@ -103,7 +104,7 @@ public class TaskSchedulerController {
     public String stopTask() {
 
         ScheduledFuture scheduledFuture = contractProcessingService.getScheduledFuture();
-        if (scheduledFuture != null&&!scheduledFuture.isCancelled()) {
+        if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
 
             //已经开始的任务（执行过程中判断iscancel()可以自行中断），应该开始但没开始的任务（等待的任务，没分配到线程，则直接不开始了），还没开始的任务（直接就不开始了）
             scheduledFuture.cancel(true);
@@ -114,7 +115,7 @@ public class TaskSchedulerController {
             log.info("task is already stopped");
         }
 
-        return "stopped";
+        return stopped;
 
     }
 
@@ -123,20 +124,20 @@ public class TaskSchedulerController {
     public String repairTask() {
 
         Map<String, List<Pod>> podsGroupByStatus = getPodsGroupByStatus();
-        List<Pod> runningTaskPods=podsGroupByStatus.get("running");
-        int runningTasks=runningTaskPods==null?0:runningTaskPods.size();
-        List<Pod> stoppedTaskPods=podsGroupByStatus.get("stopped");
+        List<Pod> runningTaskPods = podsGroupByStatus.get(running);
+        int runningTasks = runningTaskPods == null ? 0 : runningTaskPods.size();
+        List<Pod> stoppedTaskPods = podsGroupByStatus.get(stopped);
 
-        if(runningTasks>0){//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
-            return "existing running task:{"+runningTasks+"},please finish all running task and begin to reprocess";
+        if (runningTasks > 0) {//全部结束，才可以处理错误，不可以暂停之后直接处理错误，会数据错乱
+            return "existing running task:{" + runningTasks + "},please finish all running task and begin to reprocess";
         }
 
         shardStatusService.resetShardStatus();
 
-        for (Pod pod:stoppedTaskPods) {
+        for (Pod pod : stoppedTaskPods) {
 
             String url = String.format("http://%s:8080/api/task/start", pod.getStatus().getPodIP());
-            SchedulerStartRequest request=new SchedulerStartRequest();
+            SchedulerStartRequest request = new SchedulerStartRequest();
             request.setIsRepair(true);
             restTemplate.postForObject(url, request, String.class);
         }
@@ -148,30 +149,32 @@ public class TaskSchedulerController {
 
     private int adjustTask(int taskCount) {
         Map<String, List<Pod>> podsGroupByStatus = getPodsGroupByStatus();
-        List<Pod> runningTaskPods=podsGroupByStatus.get("running");
-        int runningTasks=runningTaskPods==null?0:runningTaskPods.size();
-        List<Pod> stoppedTaskPods=podsGroupByStatus.get("stopped");
-        int stoppedTasks=stoppedTaskPods==null?0:stoppedTaskPods.size();
+        List<Pod> runningTaskPods = podsGroupByStatus.get(running);
+        int runningTasks = runningTaskPods == null ? 0 : runningTaskPods.size();
+        List<Pod> stoppedTaskPods = podsGroupByStatus.get(stopped);
+        int stoppedTasks = stoppedTaskPods == null ? 0 : stoppedTaskPods.size();
 
-        if (taskCount>runningTasks+stoppedTasks||taskCount<0){
+        if (taskCount > runningTasks + stoppedTasks || taskCount < 0) {
             return -1;
         }
 
         if (taskCount > runningTasks) {
             // Start additional tasks
-            for (int i = 0; i < taskCount - runningTasks; i++) {
-
-                String url = String.format("http://%s:8080/api/task/start", stoppedTaskPods.get(i % stoppedTasks).getStatus().getPodIP());
-                restTemplate.postForObject(url,null,String.class);
-                log.info("existing running task:{},stopped task：{},so start task: {}",runningTasks,stoppedTasks,taskCount-runningTasks);
-
+            if (stoppedTasks > 0) {
+                for (int i = 0; i < taskCount - runningTasks; i++) {
+                    String url = String.format("http://%s:8080/api/task/start", stoppedTaskPods.get(i % stoppedTasks).getStatus().getPodIP());
+                    restTemplate.postForObject(url, null, String.class);
+                    log.info("existing running task:{},stopped task：{},so start task: {}", runningTasks, stoppedTasks, taskCount - runningTasks);
+                }
             }
         } else if (taskCount < runningTasks) {
             // Stop some tasks
-            for (int i = 0; i < runningTasks - taskCount; i++) {
-                String url = String.format("http://%s:8080/api/task/stop", runningTaskPods.get(i % runningTasks).getStatus().getPodIP());
-                restTemplate.postForObject(url,null,String.class);
-                log.info("existing running task:{},stopped task：{},so stop task: {}",runningTasks,stoppedTasks,runningTasks-taskCount);
+            if (runningTasks > 0) {
+                for (int i = 0; i < runningTasks - taskCount; i++) {
+                    String url = String.format("http://%s:8080/api/task/stop", runningTaskPods.get(i % runningTasks).getStatus().getPodIP());
+                    restTemplate.postForObject(url, null, String.class);
+                    log.info("existing running task:{},stopped task：{},so stop task: {}", runningTasks, stoppedTasks, runningTasks - taskCount);
+                }
             }
         }
 
@@ -183,11 +186,11 @@ public class TaskSchedulerController {
         Map<String, List<Pod>> statusMap = new HashMap<>();
 
         for (Pod pod : pods) {
-            log.info("retrieve the pod：{}",pod.getMetadata().getName());
+            log.info("retrieve the pod：{}", pod.getMetadata().getName());
             String podIp = pod.getStatus().getPodIP();
             String url = String.format("http://%s:8080/api/task/status", podIp);
 
-            String taskStatus=restTemplate.getForObject(url,String.class);
+            String taskStatus = restTemplate.getForObject(url, String.class);
 
             statusMap.computeIfAbsent(taskStatus, k -> new ArrayList<>()).add(pod);
         }
